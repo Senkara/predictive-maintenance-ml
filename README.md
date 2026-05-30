@@ -1,97 +1,182 @@
-# Predictive Maintenance Machine Learning Project
+# Predictive Maintenance Classification Project
 
-This project predicts machine failures using machine learning algorithms.
+## Proje Amacı
 
-## Dataset
-Predictive Maintenance Dataset from Kaggle:
-https://www.kaggle.com/datasets/shivamb/machine-predictive-maintenance-classification
+Bu projede makine sensör verileri kullanılarak bir makinenin arıza yapıp yapmayacağının tahmin edilmesi amaçlanmıştır.
 
----
+Endüstriyel ortamlarda makinelerin arızalanmadan önce tespit edilmesi bakım maliyetlerini azaltmakta ve üretim sürekliliğini artırmaktadır. Bu nedenle Predictive Maintenance (Kestirimci Bakım) uygulamaları büyük önem taşımaktadır.
 
-# Project Workflow
-
-1. Data Loading
-2. Exploratory Data Analysis (EDA)
-3. Data Preprocessing
-4. Train-Test Split
-5. Model Training
-6. Model Evaluation
-7. Feature Importance Analysis
+Bu çalışmada farklı makine öğrenmesi algoritmaları uygulanmış ve performansları karşılaştırılmıştır.
 
 ---
 
-# Data Preprocessing
+## Kullanılan Veri Seti
 
-The following preprocessing steps were applied:
+Projede Predictive Maintenance veri seti kullanılmıştır.
 
-- Encoded categorical `Type` feature
-- Removed unnecessary columns:
-  - UDI
-  - Product ID
-  - Failure Type
+Veri setinde aşağıdaki bilgiler bulunmaktadır:
 
----
+* Product Type
+* Air Temperature
+* Process Temperature
+* Rotational Speed
+* Torque
+* Tool Wear
 
-# Machine Learning Models
+Hedef değişken:
 
-The following models were used:
-
-- Logistic Regression
-- Decision Tree
-- Random Forest
+* 0 → Arıza Yok
+* 1 → Arıza Var
 
 ---
 
-# Results
+## Veri Ön İşleme (Preprocessing)
 
-| Model | Accuracy |
-|---|---|
-| Logistic Regression | 0.974 |
-| Decision Tree | 0.977 |
-| Random Forest | 0.984 |
+Model eğitimine başlamadan önce veri üzerinde bazı düzenlemeler yapılmıştır.
 
-Random Forest produced the best overall performance.
+### 1. Gereksiz Sütunların Kaldırılması
+
+Aşağıdaki sütunlar model eğitimine doğrudan katkı sağlamadığı için kaldırılmıştır:
+
+* UDI
+* Product ID
+* Failure Type
+
+**Neden kaldırıldı?**
+
+* UDI yalnızca satır numarasıdır.
+* Product ID benzersiz ürün kodudur ve tahmin gücü düşüktür.
+* Failure Type ise arıza bilgisini doğrudan içerdiğinden veri sızıntısına (data leakage) neden olabilir.
+
+### 2. Kategorik Verinin Sayısallaştırılması
+
+Type sütunu aşağıdaki şekilde dönüştürülmüştür:
+
+* L → 0
+* M → 1
+* H → 2
+
+**Neden yapıldı?**
+
+Makine öğrenmesi algoritmaları metinsel veriler yerine sayısal veriler ile çalıştığı için kategorik değişkenlerin sayısallaştırılması gerekmektedir.
+
+### 3. Train-Test Ayrımı
+
+Veri seti:
+
+* %80 Eğitim Verisi
+* %20 Test Verisi
+
+olarak ayrılmıştır.
+
+Ayrıca veri seti dengesiz olduğu için `stratify=y` kullanılmıştır.
+
+**Neden yapıldı?**
+
+Arızalı örneklerin oranı oldukça düşüktür. Stratify kullanılarak eğitim ve test verilerinde sınıf dağılımının korunması sağlanmıştır.
 
 ---
 
-# Feature Importance
+## Kullanılan Modeller ve Seçilme Nedenleri
 
-Random Forest feature importance analysis showed that:
+### Logistic Regression
 
-- Torque
-- Rotational Speed
-- Tool Wear
+İlk olarak Logistic Regression modeli kullanılmıştır.
 
-were the most influential features for predicting machine failures.
+**Neden seçildi?**
 
----
-
-# Technologies Used
-
-- Python
-- Pandas
-- Scikit-learn
-- Matplotlib
-- Jupyter Notebook
+Bu model basit ve yorumlanabilir olduğu için diğer modellerle karşılaştırma yapmak amacıyla temel model (baseline) olarak kullanılmıştır.
 
 ---
 
-# How to Run
+### Decision Tree
 
-Install dependencies:
+Karar ağacı modeli uygulanmıştır.
 
-```bash
-pip install -r requirements.txt
-```
+**Neden seçildi?**
 
-Run the notebook:
+Karar verme süreci kolay yorumlanabilir ve hangi özelliklerin tahmin üzerinde etkili olduğu daha rahat incelenebilir.
 
-```bash
-jupyter notebook
-```
+---
 
-Open:
+### Random Forest
 
-```text
-notebooks/analysis.ipynb
-```
+Birden fazla karar ağacının birleşiminden oluşan ensemble öğrenme yöntemidir.
+
+**Neden seçildi?**
+
+Tek bir karar ağacına göre daha kararlı ve güçlü sonuçlar vermektedir. Gürültülü verilerde genellikle daha başarılıdır.
+
+---
+
+### Balanced Random Forest
+
+Random Forest modelinin sınıf dengesizliğini dikkate alan versiyonu kullanılmıştır.
+
+**Neden seçildi?**
+
+Veri setinde arızalı örneklerin oranı düşük olduğu için modelin azınlık sınıfını daha iyi öğrenmesi amaçlanmıştır.
+
+---
+
+### Gradient Boosting
+
+Gradient Boosting modeli uygulanmıştır.
+
+**Neden seçildi?**
+
+Zayıf öğrenicileri ardışık şekilde geliştirerek yüksek doğruluk elde edebilen güçlü bir ensemble yöntemidir.
+
+---
+
+## Değerlendirme Kriterleri
+
+Modeller aşağıdaki metrikler ile değerlendirilmiştir:
+
+* Accuracy
+* Precision
+* Recall
+* F1-Score
+* Confusion Matrix
+
+### Accuracy
+
+Toplam doğru tahmin oranını göstermektedir.
+
+### Precision
+
+Arıza olarak tahmin edilen örneklerin ne kadarının gerçekten arıza olduğunu göstermektedir.
+
+### Recall
+
+Gerçek arızaların ne kadarının yakalanabildiğini göstermektedir.
+
+Bu proje için en önemli metriklerden biridir çünkü amaç arızaları kaçırmamaktır.
+
+### F1-Score
+
+Precision ve Recall değerlerinin dengeli bir birleşimidir.
+
+---
+
+## Feature Importance Analizi
+
+Random Forest modeli kullanılarak özellik önemleri hesaplanmıştır.
+
+Bu analiz sayesinde hangi sensör verilerinin arıza tahmininde daha etkili olduğu incelenmiştir.
+
+Ayrıca sonuçlar grafik ile görselleştirilmiştir.
+
+---
+
+## Sonuç
+
+Bu çalışmada farklı makine öğrenmesi algoritmaları kullanılarak makine arızası tahmini gerçekleştirilmiştir.
+
+Logistic Regression temel karşılaştırma modeli olarak kullanılmış, ardından daha güçlü ağaç tabanlı modeller uygulanmıştır.
+
+Özellikle Random Forest, Balanced Random Forest ve Gradient Boosting modelleri başarılı sonuçlar vermiştir.
+
+Veri setinin dengesiz yapısından dolayı yalnızca doğruluk (accuracy) değeri değil, recall ve F1-score değerleri de değerlendirilmiştir.
+
+Bu proje, kestirimci bakım uygulamalarında makine öğrenmesi yöntemlerinin etkili şekilde kullanılabileceğini göstermektedir.
